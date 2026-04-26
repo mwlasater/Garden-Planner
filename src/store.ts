@@ -87,6 +87,9 @@ export const useGarden = create<GardenState & Actions>()(
       name: STORAGE_KEY,
       version: 1,
       migrate: (persisted, version) => {
+        // v0 → v1: no schema changes; pass through unchanged.
+        // Future migrations should set new required fields explicitly
+        // rather than relying on the GardenState cast.
         if (version === 0) return persisted as GardenState;
         return persisted as GardenState;
       },

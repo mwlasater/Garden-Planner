@@ -29,11 +29,11 @@ function ClickToPlace({ onPick }: { onPick: (lat: number, lon: number) => void }
   return null;
 }
 
-function RecenterMap({ lat, lon, zoom }: { lat: number; lon: number; zoom?: number }) {
+function RecenterMap({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap();
   useEffect(() => {
-    map.setView([lat, lon], zoom ?? map.getZoom());
-  }, [lat, lon, zoom, map]);
+    map.setView([lat, lon], map.getZoom());
+  }, [lat, lon, map]);
   return null;
 }
 
