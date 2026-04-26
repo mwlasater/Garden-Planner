@@ -12,6 +12,10 @@ export const PLANTS: Plant[] = [
     companions: ["basil", "carrot", "onion", "parsley", "marigold", "chives", "lettuce"],
     antagonists: ["cabbage", "broccoli", "kale", "cauliflower", "corn", "fennel", "dill", "potato"],
     notes: "Stake or cage indeterminate varieties. Heavy feeder.",
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 6,
+      transplantWeeksAfterLastFrost: 2,
+    },
   },
   {
     id: "pepper",
@@ -23,6 +27,10 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 70,
     companions: ["basil", "tomato", "onion", "carrot", "parsley"],
     antagonists: ["fennel", "cabbage", "broccoli", "kale"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 8,
+      transplantWeeksAfterLastFrost: 3,
+    },
   },
   {
     id: "eggplant",
@@ -34,6 +42,10 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 80,
     companions: ["pepper", "bean-bush", "marigold", "thyme"],
     antagonists: ["fennel"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 8,
+      transplantWeeksAfterLastFrost: 3,
+    },
   },
   {
     id: "potato",
@@ -45,6 +57,9 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 90,
     companions: ["bean-bush", "cabbage", "corn", "marigold"],
     antagonists: ["tomato", "cucumber", "squash", "pumpkin", "sunflower"],
+    timing: {
+      directSowWeeksAfterLastFrost: -2,
+    },
   },
   {
     id: "cabbage",
@@ -56,6 +71,10 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 70,
     companions: ["onion", "garlic", "dill", "beet", "potato", "celery"],
     antagonists: ["tomato", "strawberry", "bean-pole"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 6,
+      transplantWeeksAfterLastFrost: -2,
+    },
   },
   {
     id: "broccoli",
@@ -67,6 +86,10 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 65,
     companions: ["onion", "garlic", "dill", "beet", "celery", "potato"],
     antagonists: ["tomato", "strawberry", "bean-pole"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 6,
+      transplantWeeksAfterLastFrost: -2,
+    },
   },
   {
     id: "kale",
@@ -78,6 +101,11 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 55,
     companions: ["onion", "garlic", "dill", "beet"],
     antagonists: ["tomato", "strawberry", "bean-pole"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 6,
+      transplantWeeksAfterLastFrost: -2,
+      harvestableThroughFirstFrost: true,
+    },
   },
   {
     id: "cauliflower",
@@ -112,6 +140,9 @@ export const PLANTS: Plant[] = [
     companions: ["tomato", "onion", "leek", "rosemary", "sage", "lettuce", "chives"],
     antagonists: ["dill"],
     notes: "Dill is fine while carrots are young, problematic at maturity.",
+    timing: {
+      directSowWeeksAfterLastFrost: -2,
+    },
   },
   {
     id: "lettuce",
@@ -123,6 +154,11 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 50,
     companions: ["carrot", "radish", "strawberry", "cucumber", "tomato", "chives"],
     antagonists: [],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 4,
+      transplantWeeksAfterLastFrost: -3,
+      directSowWeeksAfterLastFrost: -2,
+    },
   },
   {
     id: "spinach",
@@ -134,6 +170,9 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 45,
     companions: ["strawberry", "pea", "cilantro", "lettuce"],
     antagonists: [],
+    timing: {
+      directSowWeeksAfterLastFrost: -4,
+    },
   },
   {
     id: "radish",
@@ -145,6 +184,9 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 28,
     companions: ["cucumber", "lettuce", "pea", "spinach", "carrot"],
     antagonists: [],
+    timing: {
+      directSowWeeksAfterLastFrost: -4,
+    },
   },
   {
     id: "beet",
@@ -212,6 +254,9 @@ export const PLANTS: Plant[] = [
     companions: ["corn", "cucumber", "radish", "carrot", "marigold"],
     antagonists: ["onion", "garlic", "leek", "chives", "fennel", "beet"],
     notes: "Needs trellis or support.",
+    timing: {
+      directSowWeeksAfterLastFrost: 1,
+    },
   },
   {
     id: "bean-bush",
@@ -223,6 +268,9 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 55,
     companions: ["corn", "cucumber", "potato", "strawberry", "celery"],
     antagonists: ["onion", "garlic", "leek", "fennel"],
+    timing: {
+      directSowWeeksAfterLastFrost: 1,
+    },
   },
   {
     id: "pea",
@@ -235,6 +283,9 @@ export const PLANTS: Plant[] = [
     companions: ["carrot", "cucumber", "radish", "spinach", "lettuce"],
     antagonists: ["onion", "garlic", "chives"],
     notes: "Cool-season; trellis tall varieties.",
+    timing: {
+      directSowWeeksAfterLastFrost: -5,
+    },
   },
   {
     id: "corn",
@@ -247,6 +298,9 @@ export const PLANTS: Plant[] = [
     companions: ["bean-pole", "bean-bush", "squash", "cucumber", "pumpkin"],
     antagonists: ["tomato"],
     notes: "Plant in blocks, not rows, for pollination.",
+    timing: {
+      directSowWeeksAfterLastFrost: 2,
+    },
   },
   {
     id: "cucumber",
@@ -258,6 +312,11 @@ export const PLANTS: Plant[] = [
     daysToMaturity: 60,
     companions: ["bean-pole", "corn", "radish", "lettuce", "nasturtium", "marigold"],
     antagonists: ["potato", "sage"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 3,
+      transplantWeeksAfterLastFrost: 2,
+      directSowWeeksAfterLastFrost: 2,
+    },
   },
   {
     id: "squash",
@@ -355,6 +414,10 @@ export const PLANTS: Plant[] = [
     spacingInches: 12,
     companions: ["tomato", "pepper", "asparagus", "oregano"],
     antagonists: ["sage"],
+    timing: {
+      startIndoorsWeeksBeforeLastFrost: 6,
+      transplantWeeksAfterLastFrost: 2,
+    },
   },
   {
     id: "oregano",

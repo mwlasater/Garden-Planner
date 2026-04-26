@@ -27,3 +27,12 @@ export const USDA_ZONES: ZoneInfo[] = [
 ];
 
 export const ZONE_BY_ID = new Map(USDA_ZONES.map((z) => [z.zone, z]));
+
+export function parseFrostDate(
+  value: string | undefined,
+  year: number = new Date().getFullYear(),
+): Date | null {
+  if (!value || value === "rare" || value === "none") return null;
+  const date = new Date(`${value} ${year}`);
+  return isNaN(date.getTime()) ? null : date;
+}
