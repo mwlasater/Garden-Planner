@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { STORAGE_KEY } from "./store";
+import { isTauri, tauriFileStorage } from "./lib/storage";
 import "./index.css";
 
 class ErrorBoundary extends React.Component<
@@ -28,7 +29,10 @@ class ErrorBoundary extends React.Component<
           </div>
           <button
             className="px-4 py-2 rounded bg-red-600 text-white text-sm hover:bg-red-700"
-            onClick={() => {
+            onClick={async () => {
+              // On desktop, also delete garden.json — otherwise the next
+              // load would re-read the corrupted file and crash again.
+              if (isTauri()) await tauriFileStorage.removeItem(STORAGE_KEY);
               localStorage.removeItem(STORAGE_KEY);
               location.reload();
             }}
