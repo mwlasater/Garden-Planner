@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useGarden } from "../store";
@@ -26,6 +26,14 @@ function ClickToPlace({ onPick }: { onPick: (lat: number, lon: number) => void }
       onPick(e.latlng.lat, e.latlng.lng);
     },
   });
+  return null;
+}
+
+function RecenterMap({ lat, lon, zoom }: { lat: number; lon: number; zoom?: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lon], zoom ?? map.getZoom());
+  }, [lat, lon, zoom, map]);
   return null;
 }
 
@@ -70,7 +78,10 @@ export function LocationPanel() {
           />
           <ClickToPlace onPick={onPick} />
           {draft.lat != null && draft.lon != null && (
-            <Marker position={[draft.lat, draft.lon]} icon={markerIcon} />
+            <>
+              <Marker position={[draft.lat, draft.lon]} icon={markerIcon} />
+              <RecenterMap lat={draft.lat} lon={draft.lon} />
+            </>
           )}
         </MapContainer>
         {draft.lat != null && draft.lon != null && (

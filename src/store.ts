@@ -83,6 +83,13 @@ export const useGarden = create<GardenState & Actions>()(
         })),
       resetGarden: () => set(initial),
     }),
-    { name: STORAGE_KEY },
+    {
+      name: STORAGE_KEY,
+      version: 1,
+      migrate: (persisted, version) => {
+        if (version === 0) return persisted as GardenState;
+        return persisted as GardenState;
+      },
+    },
   ),
 );
