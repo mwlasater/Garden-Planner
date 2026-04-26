@@ -4,6 +4,7 @@ import { useGarden } from "../store";
 import { PLANT_BY_ID } from "../data/plants";
 import type { Bed, Placement } from "../types";
 import { placementVerdict } from "../lib/companions";
+import { clampBedDimension } from "../lib/bed";
 
 const SUN_ICON = { full: "☀️", partial: "⛅", shade: "🌥" } as const;
 
@@ -176,8 +177,8 @@ export function AddBedForm() {
         const data = new FormData(form);
         addBed({
           name: String(data.get("name") || "New Bed"),
-          widthFt: Math.min(20, Math.max(1, Number(data.get("widthFt")) || 4)),
-          lengthFt: Math.min(30, Math.max(1, Number(data.get("lengthFt")) || 8)),
+          widthFt: clampBedDimension(data.get("widthFt"), 1, 20, 4),
+          lengthFt: clampBedDimension(data.get("lengthFt"), 1, 30, 8),
           sun: (data.get("sun") as Bed["sun"]) || "full",
         });
         form.reset();

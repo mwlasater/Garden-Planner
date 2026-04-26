@@ -548,6 +548,10 @@ export const PLANTS: Plant[] = [
 
 export const PLANT_BY_ID = new Map(PLANTS.map((p) => [p.id, p]));
 
+export function resolvePlantName(id: string): string {
+  return PLANT_BY_ID.get(id)?.name ?? id;
+}
+
 if (import.meta.env.DEV) {
   for (const plant of PLANTS) {
     for (const id of [...plant.companions, ...plant.antagonists]) {
