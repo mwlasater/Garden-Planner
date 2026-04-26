@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Bed, GardenState, Location, Placement } from "./types";
+import { PLANT_BY_ID } from "./data/plants";
+import { plantsPerSquareFoot } from "./lib/spacing";
 
 export const STORAGE_KEY = "garden-planner-state-v1";
 
@@ -47,10 +49,15 @@ export const useGarden = create<GardenState & Actions>()(
         })),
       placePlant: (bedId, plantId, row, col) =>
         set((s) => {
-          const existing = s.placements.find(
+          const plant = PLANT_BY_ID.get(plantId);
+          if (!plant) return s;
+          const occupants = s.placements.filter(
             (p) => p.bedId === bedId && p.row === row && p.col === col,
           );
-          if (existing) return s;
+          // Cell already holds a different species — reject.
+          if (occupants.length > 0 && occupants[0].plantId !== plantId) return s;
+          // Cell at capacity for this plant's spacing — reject.
+          if (occupants.length >= plantsPerSquareFoot(plant.spacingInches)) return s;
           const placement: Placement = {
             id: uid(),
             bedId,
@@ -63,14 +70,21 @@ export const useGarden = create<GardenState & Actions>()(
         }),
       movePlacement: (placementId, bedId, row, col) =>
         set((s) => {
-          const collision = s.placements.find(
+          const moving = s.placements.find((p) => p.id === placementId);
+          if (!moving) return s;
+          const plant = PLANT_BY_ID.get(moving.plantId);
+          if (!plant) return s;
+          const occupants = s.placements.filter(
             (p) =>
               p.id !== placementId &&
               p.bedId === bedId &&
               p.row === row &&
               p.col === col,
           );
-          if (collision) return s;
+          // Different species in target cell — reject.
+          if (occupants.length > 0 && occupants[0].plantId !== moving.plantId) return s;
+          // Target cell at capacity — reject.
+          if (occupants.length >= plantsPerSquareFoot(plant.spacingInches)) return s;
           return {
             placements: s.placements.map((p) =>
               p.id === placementId ? { ...p, bedId, row, col } : p,

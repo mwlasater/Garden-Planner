@@ -6,6 +6,7 @@ import type { Bed, Placement, SunRequirement } from "../types";
 import { placementVerdict } from "../lib/companions";
 import { sunCompatible } from "../lib/sun";
 import { clampBedDimension } from "../lib/bed";
+import { plantsPerSquareFoot, subGridSide } from "../lib/spacing";
 
 const SUN_ICON = { full: "☀️", partial: "⛅", shade: "🌥" } as const;
 
@@ -106,25 +107,53 @@ function GridCell({
     id: `cell:${bedId}:${row}:${col}`,
     data: { bedId, row, col },
   });
-  const occupant = placements.find(
-    (p) => p.bedId === bedId && p.row === row && p.col === col,
-  );
+  const occupants = placements
+    .filter((p) => p.bedId === bedId && p.row === row && p.col === col)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  const firstPlant = occupants[0] ? PLANT_BY_ID.get(occupants[0].plantId) : undefined;
+  const capacity = firstPlant ? plantsPerSquareFoot(firstPlant.spacingInches) : 1;
+  const side = subGridSide(capacity);
+  const isAtCapacity = occupants.length >= capacity;
   return (
     <div
       ref={setNodeRef}
       className={`relative aspect-square border ${
         isOver
-          ? "border-leaf-500 bg-leaf-100"
+          ? isAtCapacity
+            ? "border-red-400 bg-red-50"
+            : "border-leaf-500 bg-leaf-100"
           : "border-stone-200 bg-stone-50"
       }`}
+      title={
+        occupants.length > 0
+          ? `${occupants.length}/${capacity} ${firstPlant?.name ?? ""}`
+          : undefined
+      }
     >
-      {occupant && (
-        <PlantedCell
-          placement={occupant}
-          allPlacements={placements}
-          bedSun={bedSun}
-          onRemove={() => removePlacement(occupant.id)}
-        />
+      {occupants.length > 0 && (
+        <div
+          className="absolute inset-0.5 grid gap-px"
+          style={{
+            gridTemplateColumns: `repeat(${side}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${side}, minmax(0, 1fr))`,
+          }}
+        >
+          {Array.from({ length: capacity }).map((_, idx) => {
+            const occupant = occupants[idx];
+            return (
+              <div key={idx} className="relative">
+                {occupant && (
+                  <PlantedCell
+                    placement={occupant}
+                    allPlacements={placements}
+                    bedSun={bedSun}
+                    onRemove={() => removePlacement(occupant.id)}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

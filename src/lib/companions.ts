@@ -51,14 +51,18 @@ export function placementVerdict(
 
 export function allIssues(placements: Placement[]): NeighborIssue[] {
   const issues: NeighborIssue[] = [];
+  // Dedup by (plantA, plantB, bedId) so a square-foot cell holding multiple
+  // instances of the same plant doesn't produce N identical issue rows for
+  // each nearby companion.
   const seen = new Set<string>();
   for (const p of placements) {
     for (const n of neighborsOf(p, placements)) {
-      const key = [p.id, n.id].sort().join("|");
-      if (seen.has(key)) continue;
-      seen.add(key);
       const v = verdictBetween(p.plantId, n.plantId);
       if (v === "neutral") continue;
+      const plantPair = [p.plantId, n.plantId].sort().join("|");
+      const key = `${p.bedId}|${plantPair}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       const aName = PLANT_BY_ID.get(p.plantId)?.name ?? p.plantId;
       const bName = PLANT_BY_ID.get(n.plantId)?.name ?? n.plantId;
       issues.push({
