@@ -5,9 +5,10 @@ import { LocationPanel } from "./components/LocationPanel";
 import { PlantCatalog } from "./components/PlantCatalog";
 import { BedView, AddBedForm } from "./components/BedCanvas";
 import { IssuesPanel } from "./components/IssuesPanel";
+import { CalendarView } from "./components/CalendarView";
 import { ZONE_BY_ID } from "./data/zones";
 
-type Tab = "garden" | "plants" | "location";
+type Tab = "garden" | "plants" | "calendar" | "location";
 
 function Header() {
   const gardenName = useGarden((s) => s.gardenName);
@@ -50,6 +51,7 @@ function TabBar({
   const tabs: { id: Tab; label: string }[] = [
     { id: "garden", label: "Garden" },
     { id: "plants", label: "Plant catalog" },
+    { id: "calendar", label: "Calendar" },
     { id: "location", label: "Location" },
   ];
   return (
@@ -142,6 +144,11 @@ export default function App() {
           {tab === "plants" && (
             <div className="max-w-md">
               <PlantCatalog />
+            </div>
+          )}
+          {tab === "calendar" && (
+            <div className="max-w-4xl">
+              <CalendarView />
             </div>
           )}
           {tab === "location" && (

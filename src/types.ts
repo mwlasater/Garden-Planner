@@ -7,6 +7,13 @@ export type PlantCategory =
   | "flower"
   | "root";
 
+export type PlantingTiming = {
+  startIndoorsWeeksBeforeLastFrost?: number;
+  transplantWeeksAfterLastFrost?: number;
+  directSowWeeksAfterLastFrost?: number;
+  harvestableThroughFirstFrost?: boolean;
+};
+
 export type Plant = {
   id: string;
   name: string;
@@ -18,6 +25,7 @@ export type Plant = {
   companions: string[];
   antagonists: string[];
   notes?: string;
+  timing?: PlantingTiming;
 };
 
 export type Bed = {

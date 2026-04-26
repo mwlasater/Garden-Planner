@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useGarden } from "../store";
 import { USDA_ZONES, ZONE_BY_ID } from "../data/zones";
+import { getZoneForZip } from "../data/zip-zones";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -41,6 +42,7 @@ export function LocationPanel() {
   const location = useGarden((s) => s.location);
   const setLocation = useGarden((s) => s.setLocation);
   const [draft, setDraft] = useState(location);
+  const [zoneFromZip, setZoneFromZip] = useState(false);
 
   const center: [number, number] =
     draft.lat != null && draft.lon != null
@@ -51,14 +53,23 @@ export function LocationPanel() {
     setDraft({ ...draft, lat, lon });
   };
 
-  const onZoneChange = (zone: string) => {
-    const info = ZONE_BY_ID.get(zone);
-    setDraft({
-      ...draft,
+  const applyZone = (zone: string | undefined, fromZip: boolean) => {
+    const info = zone ? ZONE_BY_ID.get(zone) : undefined;
+    setDraft((prev) => ({
+      ...prev,
       usdaZone: zone || undefined,
       lastFrost: info?.lastFrost,
       firstFrost: info?.firstFrost,
-    });
+    }));
+    setZoneFromZip(fromZip);
+  };
+
+  const onZoneChange = (zone: string) => applyZone(zone, false);
+
+  const onZipChange = (zip: string) => {
+    setDraft((prev) => ({ ...prev, zip }));
+    const detected = getZoneForZip(zip);
+    if (detected) applyZone(detected, true);
   };
 
   const save = () => setLocation(draft);
@@ -109,7 +120,7 @@ export function LocationPanel() {
             className="w-full rounded border border-stone-300 px-2 py-1"
             placeholder="12345"
             value={draft.zip ?? ""}
-            onChange={(e) => setDraft({ ...draft, zip: e.target.value })}
+            onChange={(e) => onZipChange(e.target.value)}
           />
         </label>
         <label className="text-sm">
@@ -128,6 +139,11 @@ export function LocationPanel() {
               </option>
             ))}
           </select>
+          {zoneFromZip && draft.usdaZone && (
+            <span className="block text-xs text-leaf-700 mt-1">
+              Auto-detected from ZIP (approximate — verify with USDA if unsure)
+            </span>
+          )}
         </label>
         <div className="text-sm">
           <span className="block font-medium text-stone-700 mb-1">Frost dates</span>
