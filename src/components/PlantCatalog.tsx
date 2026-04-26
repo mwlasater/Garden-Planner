@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { PLANTS, PLANT_BY_ID } from "../data/plants";
+import { PLANTS, resolvePlantName } from "../data/plants";
 import type { Plant, PlantCategory } from "../types";
 
 const CATEGORIES: (PlantCategory | "all")[] = [
@@ -80,13 +80,13 @@ function PlantDetail({ plant, onClose }: { plant: Plant; onClose: () => void }) 
       {plant.companions.length > 0 && (
         <div className="text-xs">
           <span className="text-leaf-700 font-medium">Plant with: </span>
-          {plant.companions.map((id) => PLANT_BY_ID.get(id)?.name ?? id).join(", ")}
+          {plant.companions.map(resolvePlantName).join(", ")}
         </div>
       )}
       {plant.antagonists.length > 0 && (
         <div className="text-xs">
           <span className="text-red-700 font-medium">Keep away from: </span>
-          {plant.antagonists.map((id) => PLANT_BY_ID.get(id)?.name ?? id).join(", ")}
+          {plant.antagonists.map(resolvePlantName).join(", ")}
         </div>
       )}
       {plant.notes && (
