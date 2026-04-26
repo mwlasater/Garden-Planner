@@ -19,8 +19,11 @@ describe("verdictBetween", () => {
     expect(verdictBetween("tomato", "cabbage")).toBe("conflict");
   });
 
-  it("returns neutral for unrelated pairs", () => {
+  it("identifies less-obvious synergies (tomato + asparagus)", () => {
     expect(verdictBetween("tomato", "asparagus")).toBe("synergy");
+  });
+
+  it("returns neutral for genuinely unrelated pairs (radish + fennel)", () => {
     expect(verdictBetween("radish", "fennel")).toBe("neutral");
   });
 });
