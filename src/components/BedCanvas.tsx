@@ -174,8 +174,8 @@ export function AddBedForm() {
         const data = new FormData(form);
         addBed({
           name: String(data.get("name") || "New Bed"),
-          widthFt: Number(data.get("widthFt") || 4),
-          lengthFt: Number(data.get("lengthFt") || 8),
+          widthFt: Math.min(20, Math.max(1, Number(data.get("widthFt")) || 4)),
+          lengthFt: Math.min(30, Math.max(1, Number(data.get("lengthFt")) || 8)),
           sun: (data.get("sun") as Bed["sun"]) || "full",
         });
         form.reset();

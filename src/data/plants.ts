@@ -43,7 +43,7 @@ export const PLANTS: Plant[] = [
     sun: "full",
     spacingInches: 12,
     daysToMaturity: 90,
-    companions: ["bean-bush", "cabbage", "corn", "marigold", "horseradish"],
+    companions: ["bean-bush", "cabbage", "corn", "marigold"],
     antagonists: ["tomato", "cucumber", "squash", "pumpkin", "sunflower"],
   },
   {
@@ -54,7 +54,7 @@ export const PLANTS: Plant[] = [
     sun: "full",
     spacingInches: 18,
     daysToMaturity: 70,
-    companions: ["onion", "garlic", "dill", "beet", "chamomile", "potato", "celery"],
+    companions: ["onion", "garlic", "dill", "beet", "potato", "celery"],
     antagonists: ["tomato", "strawberry", "bean-pole"],
   },
   {
