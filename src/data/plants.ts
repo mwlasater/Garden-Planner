@@ -43,7 +43,7 @@ export const PLANTS: Plant[] = [
     sun: "full",
     spacingInches: 12,
     daysToMaturity: 90,
-    companions: ["bean-bush", "cabbage", "corn", "marigold", "horseradish"],
+    companions: ["bean-bush", "cabbage", "corn", "marigold"],
     antagonists: ["tomato", "cucumber", "squash", "pumpkin", "sunflower"],
   },
   {
@@ -54,7 +54,7 @@ export const PLANTS: Plant[] = [
     sun: "full",
     spacingInches: 18,
     daysToMaturity: 70,
-    companions: ["onion", "garlic", "dill", "beet", "chamomile", "potato", "celery"],
+    companions: ["onion", "garlic", "dill", "beet", "potato", "celery"],
     antagonists: ["tomato", "strawberry", "bean-pole"],
   },
   {
@@ -484,3 +484,13 @@ export const PLANTS: Plant[] = [
 ];
 
 export const PLANT_BY_ID = new Map(PLANTS.map((p) => [p.id, p]));
+
+if (import.meta.env.DEV) {
+  for (const plant of PLANTS) {
+    for (const id of [...plant.companions, ...plant.antagonists]) {
+      if (!PLANT_BY_ID.has(id)) {
+        console.warn(`[plants] Unknown ID "${id}" in ${plant.id} companions/antagonists`);
+      }
+    }
+  }
+}
