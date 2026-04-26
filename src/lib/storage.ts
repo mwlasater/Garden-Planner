@@ -57,3 +57,45 @@ export const tauriFileStorage: StateStorage = {
     }
   },
 };
+
+const PHOTOS_DIR = "photos";
+
+async function ensurePhotosDir(): Promise<void> {
+  const { fs, opts } = await tauriFs();
+  if (!(await fs.exists(PHOTOS_DIR, opts))) {
+    await fs.mkdir(PHOTOS_DIR, { ...opts, recursive: true });
+  }
+}
+
+export async function writePhoto(
+  filename: string,
+  bytes: Uint8Array,
+): Promise<void> {
+  const { fs, opts } = await tauriFs();
+  await ensurePhotosDir();
+  await fs.writeFile(`${PHOTOS_DIR}/${filename}`, bytes, opts);
+}
+
+export async function readPhoto(filename: string): Promise<Uint8Array | null> {
+  try {
+    const { fs, opts } = await tauriFs();
+    const path = `${PHOTOS_DIR}/${filename}`;
+    if (!(await fs.exists(path, opts))) return null;
+    return await fs.readFile(path, opts);
+  } catch (err) {
+    console.error("[readPhoto]", err);
+    return null;
+  }
+}
+
+export async function deletePhoto(filename: string): Promise<void> {
+  try {
+    const { fs, opts } = await tauriFs();
+    const path = `${PHOTOS_DIR}/${filename}`;
+    if (await fs.exists(path, opts)) {
+      await fs.remove(path, opts);
+    }
+  } catch (err) {
+    console.error("[deletePhoto]", err);
+  }
+}

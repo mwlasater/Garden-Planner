@@ -120,3 +120,55 @@ describe("movePlacement capacity enforcement", () => {
     expect(moving.col).toBe(1);
   });
 });
+
+describe("placement notes & photos", () => {
+  let bedId: string;
+  let placementId: string;
+
+  beforeEach(() => {
+    useGarden.getState().resetGarden();
+    bedId = useGarden.getState().addBed({
+      name: "Test bed",
+      widthFt: 4,
+      lengthFt: 4,
+      sun: "full",
+    });
+    useGarden.getState().placePlant(bedId, "tomato", 0, 0);
+    placementId = useGarden.getState().placements[0].id;
+  });
+
+  it("setPlacementNotes saves and trims-to-undefined when cleared", () => {
+    useGarden.getState().setPlacementNotes(placementId, "Cherokee Purple, 12 in deep");
+    expect(useGarden.getState().placements[0].notes).toBe("Cherokee Purple, 12 in deep");
+    useGarden.getState().setPlacementNotes(placementId, "");
+    expect(useGarden.getState().placements[0].notes).toBeUndefined();
+  });
+
+  it("addPlacementPhoto appends to the photos list", () => {
+    useGarden.getState().addPlacementPhoto(placementId, "abc123.jpg");
+    useGarden.getState().addPlacementPhoto(placementId, "def456.png");
+    expect(useGarden.getState().placements[0].photos).toEqual(["abc123.jpg", "def456.png"]);
+  });
+
+  it("removePlacementPhoto removes the named filename and clears the field when empty", () => {
+    useGarden.getState().addPlacementPhoto(placementId, "abc123.jpg");
+    useGarden.getState().addPlacementPhoto(placementId, "def456.png");
+    useGarden.getState().removePlacementPhoto(placementId, "abc123.jpg");
+    expect(useGarden.getState().placements[0].photos).toEqual(["def456.png"]);
+    useGarden.getState().removePlacementPhoto(placementId, "def456.png");
+    expect(useGarden.getState().placements[0].photos).toBeUndefined();
+  });
+
+  it("removing a placement clears it from selectedPlacementId", () => {
+    useGarden.getState().selectPlacement(placementId);
+    expect(useGarden.getState().selectedPlacementId).toBe(placementId);
+    useGarden.getState().removePlacement(placementId);
+    expect(useGarden.getState().selectedPlacementId).toBeNull();
+  });
+
+  it("selectPlacement(null) closes the drawer", () => {
+    useGarden.getState().selectPlacement(placementId);
+    useGarden.getState().selectPlacement(null);
+    expect(useGarden.getState().selectedPlacementId).toBeNull();
+  });
+});
