@@ -42,9 +42,12 @@ export function computeWindows(
   }
 
   if (plant.daysToMaturity != null && (windows.length > 0 || firstFrost)) {
+    // Anchor harvest to the in-ground date (transplant or direct sow). If a
+    // plant only specifies startIndoors with no transplant date, fall back to
+    // last frost as a rough proxy — no current plant hits this path.
     const seedDate =
       windows.find((w) => w.kind === "transplant" || w.kind === "directSow")?.start ??
-      shiftDays(lastFrost, 0);
+      new Date(lastFrost);
     const harvestStart = shiftDays(seedDate, plant.daysToMaturity);
     const harvestEnd =
       t.harvestableThroughFirstFrost && firstFrost

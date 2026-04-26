@@ -70,6 +70,7 @@ export function LocationPanel() {
     setDraft((prev) => ({ ...prev, zip }));
     const detected = getZoneForZip(zip);
     if (detected) applyZone(detected, true);
+    else setZoneFromZip(false);
   };
 
   const save = () => setLocation(draft);

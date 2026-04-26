@@ -62,7 +62,7 @@ export function CalendarView() {
       const windows = computeWindows(plant, lastFrost, firstFrost);
       return { plant, windows };
     })
-    .filter((r): r is { plant: NonNullable<typeof r>["plant"]; windows: TimingWindow[] } => r !== null);
+    .filter((r): r is NonNullable<typeof r> => r !== null);
 
   const withTiming = rows.filter((r) => r.windows.length > 0);
   const withoutTiming = rows.filter((r) => r.windows.length === 0);
