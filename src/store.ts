@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { Bed, GardenState, Location, Placement } from "./types";
 import { PLANT_BY_ID } from "./data/plants";
 import { plantsPerSquareFoot } from "./lib/spacing";
+import { isTauri, tauriFileStorage } from "./lib/storage";
 
 export const STORAGE_KEY = "garden-planner-state-v1";
 
@@ -100,6 +101,12 @@ export const useGarden = create<GardenState & Actions>()(
     {
       name: STORAGE_KEY,
       version: 1,
+      // In Tauri (desktop) we persist to a JSON file in the OS app-data dir
+      // so user data survives a webview cache clear and is portable to
+      // backup tools. In a plain browser we keep the localStorage default.
+      storage: createJSONStorage(() =>
+        isTauri() ? tauriFileStorage : localStorage,
+      ),
       migrate: (persisted, version) => {
         // v0 → v1: no schema changes; pass through unchanged.
         // Future migrations should set new required fields explicitly
