@@ -1,4 +1,5 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
+import { useShallow } from "zustand/react/shallow";
 import { useGarden } from "../store";
 import { PLANT_BY_ID } from "../data/plants";
 import type { Bed, Placement } from "../types";
@@ -107,10 +108,11 @@ function GridCell({
 }
 
 export function BedView({ bed }: { bed: Bed }) {
-  const placements = useGarden((s) => s.placements);
+  const inBed = useGarden(
+    useShallow((s) => s.placements.filter((p) => p.bedId === bed.id)),
+  );
   const removeBed = useGarden((s) => s.removeBed);
   const updateBed = useGarden((s) => s.updateBed);
-  const inBed = placements.filter((p) => p.bedId === bed.id);
 
   const cols = Math.max(1, Math.round(bed.widthFt));
   const rows = Math.max(1, Math.round(bed.lengthFt));
