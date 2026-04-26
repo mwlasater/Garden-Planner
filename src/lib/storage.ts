@@ -4,6 +4,9 @@ export function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
 
+// Decoupled from STORAGE_KEY on purpose — the persisted file name should
+// stay stable across Zustand key changes (e.g. namespace reorgs) so users
+// don't lose data on upgrade.
 const FILE = "garden.json";
 
 // Lazy import so the @tauri-apps/plugin-fs module is never resolved in
@@ -40,6 +43,9 @@ export const tauriFileStorage: StateStorage = {
       console.error("[tauriFileStorage.setItem]", err);
     }
   },
+  // The Zustand `key` argument is intentionally ignored here (and in
+  // getItem/setItem above) — this adapter is hardcoded to the single
+  // FILE path; the key only matters for the localStorage fallback.
   async removeItem() {
     try {
       const { fs, opts } = await tauriFs();
