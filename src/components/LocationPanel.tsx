@@ -5,6 +5,13 @@ import "leaflet/dist/leaflet.css";
 import { useGarden } from "../store";
 import { USDA_ZONES, ZONE_BY_ID } from "../data/zones";
 
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: "/marker-icon.png",
+  iconRetinaUrl: "/marker-icon-2x.png",
+  shadowUrl: "/marker-shadow.png",
+});
+
 const markerIcon = L.icon({
   iconUrl: "/marker-icon.png",
   iconRetinaUrl: "/marker-icon-2x.png",

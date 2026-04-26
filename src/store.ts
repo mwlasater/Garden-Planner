@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Bed, GardenState, Location, Placement } from "./types";
 
+export const STORAGE_KEY = "garden-planner-state-v1";
+
 type Actions = {
   setGardenName: (name: string) => void;
   setLocation: (location: Location) => void;
@@ -81,6 +83,6 @@ export const useGarden = create<GardenState & Actions>()(
         })),
       resetGarden: () => set(initial),
     }),
-    { name: "garden-planner-state-v1" },
+    { name: STORAGE_KEY },
   ),
 );
