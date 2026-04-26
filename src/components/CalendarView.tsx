@@ -3,7 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useGarden } from "../store";
 import { PLANT_BY_ID } from "../data/plants";
 import { parseFrostDate } from "../data/zones";
-import { computeWindows, monthLabel, type TimingWindow } from "../lib/calendar";
+import { computeWindows, monthLabel, targetCalendarYear, type TimingWindow } from "../lib/calendar";
 
 const KIND_LABEL: Record<TimingWindow["kind"], string> = {
   startIndoors: "Start indoors",
@@ -25,10 +25,10 @@ export function CalendarView() {
     useShallow((s) => Array.from(new Set(s.placements.map((p) => p.plantId)))),
   );
 
-  const lastFrost = parseFrostDate(location.lastFrost);
-  const firstFrost = parseFrostDate(location.firstFrost);
+  const year = targetCalendarYear(new Date(), location.firstFrost);
+  const lastFrost = parseFrostDate(location.lastFrost, year);
+  const firstFrost = parseFrostDate(location.firstFrost, year);
 
-  const year = lastFrost?.getFullYear() ?? new Date().getFullYear();
   const yearStart = new Date(year, 0, 1).getTime();
   const yearEnd = new Date(year + 1, 0, 1).getTime();
   const yearMs = yearEnd - yearStart;

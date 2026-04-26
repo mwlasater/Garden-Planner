@@ -1,4 +1,5 @@
 import type { Plant } from "../types";
+import { parseFrostDate } from "../data/zones";
 
 export type TimingWindow = {
   kind: "startIndoors" | "transplant" | "directSow" | "harvest";
@@ -63,4 +64,16 @@ export function computeWindows(
 
 export function monthLabel(d: Date): string {
   return d.toLocaleString("en-US", { month: "short" });
+}
+
+export function targetCalendarYear(
+  today: Date,
+  firstFrost: string | undefined,
+): number {
+  const currentYear = today.getFullYear();
+  const thisYearsFirstFrost = parseFrostDate(firstFrost, currentYear);
+  if (thisYearsFirstFrost && today > thisYearsFirstFrost) {
+    return currentYear + 1;
+  }
+  return currentYear;
 }

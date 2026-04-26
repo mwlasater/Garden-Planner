@@ -2,17 +2,19 @@ import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useShallow } from "zustand/react/shallow";
 import { useGarden } from "../store";
 import { PLANT_BY_ID } from "../data/plants";
-import type { Bed, Placement } from "../types";
+import type { Bed, Placement, SunRequirement } from "../types";
 import { placementVerdict } from "../lib/companions";
+import { sunCompatible } from "../lib/sun";
 import { clampBedDimension } from "../lib/bed";
 
 const SUN_ICON = { full: "☀️", partial: "⛅", shade: "🌥" } as const;
 
-const VERDICT_RING = {
-  synergy: "ring-2 ring-leaf-500",
+const RING_BY_KIND = {
   conflict: "ring-2 ring-red-500",
+  sunWarning: "ring-2 ring-amber-500",
+  synergy: "ring-2 ring-leaf-500",
   neutral: "ring-1 ring-stone-300",
-};
+} as const;
 
 function plantSwatch(plantId: string): string {
   const plant = PLANT_BY_ID.get(plantId);
@@ -36,14 +38,31 @@ function plantSwatch(plantId: string): string {
 function PlantedCell({
   placement,
   allPlacements,
+  bedSun,
   onRemove,
 }: {
   placement: Placement;
   allPlacements: Placement[];
+  bedSun: SunRequirement;
   onRemove: () => void;
 }) {
   const plant = PLANT_BY_ID.get(placement.plantId);
   const verdict = placementVerdict(placement, allPlacements);
+  const sunMismatch = plant ? !sunCompatible(plant.sun, bedSun) : false;
+  const ringKind =
+    verdict === "conflict"
+      ? "conflict"
+      : sunMismatch
+        ? "sunWarning"
+        : verdict === "synergy"
+          ? "synergy"
+          : "neutral";
+  const titleSuffix = [
+    verdict !== "neutral" ? verdict : null,
+    sunMismatch ? `needs ${plant?.sun} sun` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `placement:${placement.id}`,
     data: { source: "placement", placementId: placement.id },
@@ -54,14 +73,14 @@ function PlantedCell({
       {...listeners}
       {...attributes}
       title={`${plant?.name ?? placement.plantId}${
-        verdict !== "neutral" ? ` — ${verdict}` : ""
+        titleSuffix ? ` — ${titleSuffix}` : ""
       } (right-click to remove)`}
       onContextMenu={(e) => {
         e.preventDefault();
         onRemove();
       }}
       className={`absolute inset-0.5 rounded flex items-center justify-center text-lg bg-white cursor-grab ${
-        VERDICT_RING[verdict]
+        RING_BY_KIND[ringKind]
       } ${isDragging ? "opacity-50" : ""}`}
     >
       <span aria-hidden>{plantSwatch(placement.plantId)}</span>
@@ -71,11 +90,13 @@ function PlantedCell({
 
 function GridCell({
   bedId,
+  bedSun,
   row,
   col,
   placements,
 }: {
   bedId: string;
+  bedSun: SunRequirement;
   row: number;
   col: number;
   placements: Placement[];
@@ -101,6 +122,7 @@ function GridCell({
         <PlantedCell
           placement={occupant}
           allPlacements={placements}
+          bedSun={bedSun}
           onRemove={() => removePlacement(occupant.id)}
         />
       )}
@@ -154,6 +176,7 @@ export function BedView({ bed }: { bed: Bed }) {
             <GridCell
               key={`${row}-${col}`}
               bedId={bed.id}
+              bedSun={bed.sun}
               row={row}
               col={col}
               placements={inBed}
