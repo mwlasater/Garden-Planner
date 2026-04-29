@@ -44,6 +44,8 @@ export type Placement = {
   row: number;
   col: number;
   plantedAt?: string;
+  notes?: string;
+  photos?: string[];
 };
 
 export type Location = {

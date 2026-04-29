@@ -47,9 +47,11 @@ function PlantedCell({
   bedSun: SunRequirement;
   onRemove: () => void;
 }) {
+  const selectPlacement = useGarden((s) => s.selectPlacement);
   const plant = PLANT_BY_ID.get(placement.plantId);
   const verdict = placementVerdict(placement, allPlacements);
   const sunMismatch = plant ? !sunCompatible(plant.sun, bedSun) : false;
+  const hasMeta = !!placement.notes || (placement.photos?.length ?? 0) > 0;
   const ringKind =
     verdict === "conflict"
       ? "conflict"
@@ -75,7 +77,8 @@ function PlantedCell({
       {...attributes}
       title={`${plant?.name ?? placement.plantId}${
         titleSuffix ? ` — ${titleSuffix}` : ""
-      } (right-click to remove)`}
+      } (click for details, right-click to remove)`}
+      onClick={() => selectPlacement(placement.id)}
       onContextMenu={(e) => {
         e.preventDefault();
         onRemove();
@@ -85,6 +88,13 @@ function PlantedCell({
       } ${isDragging ? "opacity-50" : ""}`}
     >
       <span aria-hidden>{plantSwatch(placement.plantId)}</span>
+      {hasMeta && (
+        <span
+          aria-hidden
+          className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-stone-600"
+          title="Has notes or photos"
+        />
+      )}
     </div>
   );
 }

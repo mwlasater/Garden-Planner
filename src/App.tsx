@@ -6,6 +6,7 @@ import { PlantCatalog } from "./components/PlantCatalog";
 import { BedView, AddBedForm } from "./components/BedCanvas";
 import { IssuesPanel } from "./components/IssuesPanel";
 import { CalendarView } from "./components/CalendarView";
+import { PlacementDrawer } from "./components/PlacementDrawer";
 import { ZONE_BY_ID } from "./data/zones";
 
 type Tab = "garden" | "plants" | "calendar" | "location";
@@ -157,6 +158,7 @@ export default function App() {
             </div>
           )}
         </main>
+        <PlacementDrawer />
         <footer className="text-center text-xs text-stone-500 py-3">
           Local-only · data stored in your browser
         </footer>

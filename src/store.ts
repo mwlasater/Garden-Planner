@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { Bed, GardenState, Location, Placement } from "./types";
 import { PLANT_BY_ID } from "./data/plants";
 import { plantsPerSquareFoot } from "./lib/spacing";
-import { isTauri, tauriFileStorage } from "./lib/storage";
+import { isTauri, tauriFileStorage, deletePhoto } from "./lib/storage";
 
 export const STORAGE_KEY = "garden-planner-state-v1";
 
@@ -16,7 +16,15 @@ type Actions = {
   placePlant: (bedId: string, plantId: string, row: number, col: number) => void;
   movePlacement: (placementId: string, bedId: string, row: number, col: number) => void;
   removePlacement: (placementId: string) => void;
+  setPlacementNotes: (placementId: string, notes: string) => void;
+  addPlacementPhoto: (placementId: string, filename: string) => void;
+  removePlacementPhoto: (placementId: string, filename: string) => void;
+  selectPlacement: (placementId: string | null) => void;
   resetGarden: () => void;
+};
+
+type Transient = {
+  selectedPlacementId: string | null;
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -28,10 +36,11 @@ const initial: GardenState = {
   placements: [],
 };
 
-export const useGarden = create<GardenState & Actions>()(
+export const useGarden = create<GardenState & Actions & Transient>()(
   persist(
     (set) => ({
       ...initial,
+      selectedPlacementId: null,
       setGardenName: (name) => set({ gardenName: name }),
       setLocation: (location) => set({ location }),
       addBed: (bed) => {
@@ -93,10 +102,52 @@ export const useGarden = create<GardenState & Actions>()(
           };
         }),
       removePlacement: (placementId) =>
+        set((s) => {
+          const removing = s.placements.find((p) => p.id === placementId);
+          if (removing?.photos && isTauri()) {
+            // Fire-and-forget photo cleanup; failures are logged inside
+            // deletePhoto and shouldn't block state mutation.
+            for (const filename of removing.photos) deletePhoto(filename);
+          }
+          return {
+            placements: s.placements.filter((p) => p.id !== placementId),
+            selectedPlacementId:
+              s.selectedPlacementId === placementId ? null : s.selectedPlacementId,
+          };
+        }),
+      setPlacementNotes: (placementId, notes) =>
         set((s) => ({
-          placements: s.placements.filter((p) => p.id !== placementId),
+          placements: s.placements.map((p) =>
+            p.id === placementId
+              ? { ...p, notes: notes.length > 0 ? notes : undefined }
+              : p,
+          ),
         })),
-      resetGarden: () => set(initial),
+      addPlacementPhoto: (placementId, filename) =>
+        set((s) => ({
+          placements: s.placements.map((p) =>
+            p.id === placementId
+              ? { ...p, photos: [...(p.photos ?? []), filename] }
+              : p,
+          ),
+        })),
+      removePlacementPhoto: (placementId, filename) =>
+        set((s) => {
+          // Mirror removePlacement: when running in Tauri, also delete the
+          // file from disk so the user-visible × button doesn't leave
+          // orphaned images accumulating in $APPDATA/.../photos.
+          // Fire-and-forget — failures are logged inside deletePhoto.
+          if (isTauri()) deletePhoto(filename);
+          return {
+            placements: s.placements.map((p) => {
+              if (p.id !== placementId) return p;
+              const filtered = (p.photos ?? []).filter((f) => f !== filename);
+              return { ...p, photos: filtered.length > 0 ? filtered : undefined };
+            }),
+          };
+        }),
+      selectPlacement: (placementId) => set({ selectedPlacementId: placementId }),
+      resetGarden: () => set({ ...initial, selectedPlacementId: null }),
     }),
     {
       name: STORAGE_KEY,
@@ -107,6 +158,13 @@ export const useGarden = create<GardenState & Actions>()(
       storage: createJSONStorage(() =>
         isTauri() ? tauriFileStorage : localStorage,
       ),
+      // Strip transient UI state (selection) from what gets persisted.
+      partialize: (s) => ({
+        gardenName: s.gardenName,
+        location: s.location,
+        beds: s.beds,
+        placements: s.placements,
+      }),
       migrate: (persisted, version) => {
         // v0 → v1: no schema changes; pass through unchanged.
         // Future migrations should set new required fields explicitly
