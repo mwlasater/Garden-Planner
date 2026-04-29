@@ -14,3 +14,7 @@ vite.config.d.ts
 
 src-tauri/target
 src-tauri/Cargo.lock
+
+# Cached PRISM CSVs used by scripts/build-zip-zones.mjs.
+# Regenerate the bundled JSON with: npm run build:zip-zones
+.cache/
