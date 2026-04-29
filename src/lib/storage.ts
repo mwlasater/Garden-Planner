@@ -60,19 +60,33 @@ export const tauriFileStorage: StateStorage = {
 
 const PHOTOS_DIR = "photos";
 
+// Cache the directory check so subsequent writePhoto calls within a single
+// session skip the exists+mkdir IPC round-trip.
+let photosDirReady: Promise<void> | null = null;
+
 async function ensurePhotosDir(): Promise<void> {
-  const { fs, opts } = await tauriFs();
-  if (!(await fs.exists(PHOTOS_DIR, opts))) {
-    await fs.mkdir(PHOTOS_DIR, { ...opts, recursive: true });
+  if (!photosDirReady) {
+    photosDirReady = (async () => {
+      const { fs, opts } = await tauriFs();
+      if (!(await fs.exists(PHOTOS_DIR, opts))) {
+        await fs.mkdir(PHOTOS_DIR, { ...opts, recursive: true });
+      }
+    })().catch((err) => {
+      // Reset on failure so the next call retries instead of returning the
+      // rejected promise indefinitely.
+      photosDirReady = null;
+      throw err;
+    });
   }
+  return photosDirReady;
 }
 
 export async function writePhoto(
   filename: string,
   bytes: Uint8Array,
 ): Promise<void> {
-  const { fs, opts } = await tauriFs();
   await ensurePhotosDir();
+  const { fs, opts } = await tauriFs();
   await fs.writeFile(`${PHOTOS_DIR}/${filename}`, bytes, opts);
 }
 

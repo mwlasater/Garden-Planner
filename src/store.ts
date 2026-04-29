@@ -132,13 +132,20 @@ export const useGarden = create<GardenState & Actions & Transient>()(
           ),
         })),
       removePlacementPhoto: (placementId, filename) =>
-        set((s) => ({
-          placements: s.placements.map((p) => {
-            if (p.id !== placementId) return p;
-            const filtered = (p.photos ?? []).filter((f) => f !== filename);
-            return { ...p, photos: filtered.length > 0 ? filtered : undefined };
-          }),
-        })),
+        set((s) => {
+          // Mirror removePlacement: when running in Tauri, also delete the
+          // file from disk so the user-visible × button doesn't leave
+          // orphaned images accumulating in $APPDATA/.../photos.
+          // Fire-and-forget — failures are logged inside deletePhoto.
+          if (isTauri()) deletePhoto(filename);
+          return {
+            placements: s.placements.map((p) => {
+              if (p.id !== placementId) return p;
+              const filtered = (p.photos ?? []).filter((f) => f !== filename);
+              return { ...p, photos: filtered.length > 0 ? filtered : undefined };
+            }),
+          };
+        }),
       selectPlacement: (placementId) => set({ selectedPlacementId: placementId }),
       resetGarden: () => set({ ...initial, selectedPlacementId: null }),
     }),

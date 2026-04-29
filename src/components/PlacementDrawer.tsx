@@ -24,10 +24,21 @@ export function PlacementDrawer() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draftNotes, setDraftNotes] = useState("");
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   useEffect(() => {
     setDraftNotes(placement?.notes ?? "");
   }, [placement?.id, placement?.notes]);
+
+  // Escape closes the drawer; matches standard modal/drawer UX.
+  useEffect(() => {
+    if (!placement) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [placement?.id]);
 
   useEffect(() => {
     if (!placement?.photos || !isTauri()) {
@@ -66,11 +77,22 @@ export function PlacementDrawer() {
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const filename = `${uid()}.${extOf(file.name)}`;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    await writePhoto(filename, bytes);
-    addPhoto(placement.id, filename);
-    e.target.value = "";
+    setPhotoError(null);
+    try {
+      const filename = `${uid()}.${extOf(file.name)}`;
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      await writePhoto(filename, bytes);
+      addPhoto(placement.id, filename);
+    } catch (err) {
+      // arrayBuffer() / writePhoto can fail on disk full, permission denied,
+      // or if the Tauri plugin is unavailable. Surface a brief message in
+      // the drawer instead of letting it bubble as an uncaught rejection.
+      console.error("[PlacementDrawer.onPickFile]", err);
+      setPhotoError("Couldn't save photo. Check disk space and permissions.");
+    } finally {
+      // Always reset so the same file can be re-picked after a failure.
+      e.target.value = "";
+    }
   };
 
   const onSaveNotes = () => {
@@ -147,6 +169,15 @@ export function PlacementDrawer() {
                 <span className="text-xs text-stone-500">desktop app only</span>
               )}
             </div>
+
+            {photoError && (
+              <div
+                role="alert"
+                className="mb-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-800"
+              >
+                {photoError}
+              </div>
+            )}
 
             {placement.photos && placement.photos.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">
