@@ -9,7 +9,7 @@
 // Usage: node scripts/build-zip-zones.mjs
 // Re-run when PRISM publishes a new revision.
 
-import { writeFile, mkdir, readFile, stat } from "node:fs/promises";
+import { writeFile, mkdir, readFile, rename, stat, unlink } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -41,7 +41,16 @@ async function fetchCached(file) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
   const text = await res.text();
-  await writeFile(cached, text, "utf8");
+  // Write to a temp file and rename so an interrupted download leaves no
+  // truncated cache entry that would later be served as if it were valid.
+  const tmp = `${cached}.tmp`;
+  try {
+    await writeFile(tmp, text, "utf8");
+    await rename(tmp, cached);
+  } catch (err) {
+    await unlink(tmp).catch(() => {});
+    throw err;
+  }
   return cached;
 }
 
