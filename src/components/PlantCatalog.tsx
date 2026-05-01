@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { PLANTS, resolvePlantName } from "../data/plants";
-import type { Plant, PlantCategory } from "../types";
+import type { Plant, PlantCategory, SunRequirement } from "../types";
 
 const CATEGORIES: (PlantCategory | "all")[] = [
   "all",
@@ -12,7 +12,7 @@ const CATEGORIES: (PlantCategory | "all")[] = [
   "flower",
 ];
 
-const SUN_LABEL: Record<Plant["sun"], string> = {
+const SUN_LABEL: Record<SunRequirement, string> = {
   full: "☀️ Full sun",
   partial: "⛅ Partial",
   shade: "🌥 Shade",
@@ -23,6 +23,10 @@ function PlantTile({ plant, onSelect }: { plant: Plant; onSelect: () => void }) 
     id: `catalog:${plant.id}`,
     data: { source: "catalog", plantId: plant.id },
   });
+  const meta =
+    plant.sun && plant.spacingInches != null
+      ? `${SUN_LABEL[plant.sun]} · ${plant.spacingInches}" spacing`
+      : "USDA PLANTS — no companion data";
   return (
     <button
       ref={setNodeRef}
@@ -33,11 +37,16 @@ function PlantTile({ plant, onSelect }: { plant: Plant; onSelect: () => void }) 
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <div className="font-medium text-sm">{plant.name}</div>
-      <div className="text-xs text-stone-500 italic">{plant.scientificName}</div>
-      <div className="text-xs text-stone-600 mt-1">
-        {SUN_LABEL[plant.sun]} · {plant.spacingInches}" spacing
+      <div className="flex items-start justify-between gap-2">
+        <div className="font-medium text-sm">{plant.name}</div>
+        {plant.extended && (
+          <span className="shrink-0 text-[10px] uppercase tracking-wide rounded bg-stone-100 text-stone-600 px-1.5 py-0.5">
+            ext
+          </span>
+        )}
       </div>
+      <div className="text-xs text-stone-500 italic">{plant.scientificName}</div>
+      <div className="text-xs text-stone-600 mt-1">{meta}</div>
     </button>
   );
 }
@@ -57,15 +66,26 @@ function PlantDetail({ plant, onClose }: { plant: Plant; onClose: () => void }) 
           close
         </button>
       </div>
+      {plant.extended && (
+        <div className="text-xs text-stone-600 rounded border border-stone-200 bg-white px-2 py-1">
+          Seeded from the USDA PLANTS Database. No companion or sun data —
+          edit <code className="text-stone-700">src/data/plants.ts</code> to
+          promote it to the curated catalog.
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-1 text-xs">
-        <div>
-          <span className="text-stone-500">Sun: </span>
-          {SUN_LABEL[plant.sun]}
-        </div>
-        <div>
-          <span className="text-stone-500">Spacing: </span>
-          {plant.spacingInches}"
-        </div>
+        {plant.sun && (
+          <div>
+            <span className="text-stone-500">Sun: </span>
+            {SUN_LABEL[plant.sun]}
+          </div>
+        )}
+        {plant.spacingInches != null && (
+          <div>
+            <span className="text-stone-500">Spacing: </span>
+            {plant.spacingInches}"
+          </div>
+        )}
         {plant.daysToMaturity != null && (
           <div>
             <span className="text-stone-500">Maturity: </span>

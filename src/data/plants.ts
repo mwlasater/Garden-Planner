@@ -1,6 +1,11 @@
 import type { Plant } from "../types";
+import extendedJson from "./plants-extended.json";
 
-export const PLANTS: Plant[] = [
+// Hand-curated catalog. Authoritative for companion/antagonist data:
+// only these entries participate in companion analysis (extended entries
+// have empty arrays). Editing here is the way to teach the planner
+// about a new plant's relationships.
+export const PLANTS_CURATED: Plant[] = [
   {
     id: "tomato",
     name: "Tomato",
@@ -546,6 +551,18 @@ export const PLANTS: Plant[] = [
   },
 ];
 
+// Auto-seeded from the USDA PLANTS Database via scripts/build-plants-extended.mjs.
+// Public domain (US federal work). Each entry has empty companions/antagonists
+// arrays — fill them in by promoting an entry to PLANTS_CURATED above.
+export const PLANTS_EXTENDED: Plant[] = extendedJson as Plant[];
+
+// Curated entries take precedence: if the build script missed a duplicate
+// (e.g. a curated id collides with a USDA Symbol), the curated copy wins.
+const curatedIds = new Set(PLANTS_CURATED.map((p) => p.id));
+const dedupedExtended = PLANTS_EXTENDED.filter((p) => !curatedIds.has(p.id));
+
+export const PLANTS: Plant[] = [...PLANTS_CURATED, ...dedupedExtended];
+
 export const PLANT_BY_ID = new Map(PLANTS.map((p) => [p.id, p]));
 
 export function resolvePlantName(id: string): string {
@@ -553,7 +570,9 @@ export function resolvePlantName(id: string): string {
 }
 
 if (import.meta.env.DEV) {
-  for (const plant of PLANTS) {
+  // Only check curated entries — extended ones legitimately have empty
+  // companions/antagonists, and validating their cross-refs would be a no-op.
+  for (const plant of PLANTS_CURATED) {
     for (const id of [...plant.companions, ...plant.antagonists]) {
       if (!PLANT_BY_ID.has(id)) {
         console.warn(`[plants] Unknown ID "${id}" in ${plant.id} companions/antagonists`);

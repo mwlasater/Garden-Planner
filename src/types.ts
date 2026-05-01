@@ -19,13 +19,19 @@ export type Plant = {
   name: string;
   scientificName?: string;
   category: PlantCategory;
-  sun: SunRequirement;
-  spacingInches: number;
+  // sun and spacingInches are optional because extended entries seeded
+  // from USDA PLANTS don't have gardener-facing values. Code that depends
+  // on them must guard or fall back.
+  sun?: SunRequirement;
+  spacingInches?: number;
   daysToMaturity?: number;
   companions: string[];
   antagonists: string[];
   notes?: string;
   timing?: PlantingTiming;
+  // Marker for entries that come from the auto-seeded USDA PLANTS catalog
+  // (no companion data, sparse fields). UI uses this to set expectations.
+  extended?: boolean;
 };
 
 export type Bed = {
