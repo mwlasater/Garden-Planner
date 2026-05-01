@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "tauri": "tauri",
-    "build:zip-zones": "node scripts/build-zip-zones.mjs"
+    "build:zip-zones": "node scripts/build-zip-zones.mjs",
+    "build:plants-extended": "node scripts/build-plants-extended.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
